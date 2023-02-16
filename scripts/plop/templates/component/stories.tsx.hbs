@@ -1,0 +1,16 @@
+import { withContainer } from '$/storybook/decorators/WithContainer';
+import type { Meta, Story } from '@storybook/react';
+
+import { {{ properCase name }} } from '.';
+import { Props } from './types';
+
+export default {
+  component: {{ properCase name }},
+  title: 'General/{{ properCase name }}',
+  decorators: [withContainer()],
+} as Meta;
+
+const Template: Story<Props> = (args) => <{{ properCase name }} {...args} />;
+
+export const Default = Template.bind({});
+Default.args = {};
