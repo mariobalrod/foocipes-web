@@ -49,6 +49,7 @@ specifiers:
   lint-staged: ^13.1.2
   next: ^13.1.6
   next-images: ^1.8.4
+  npm-run-all: ^4.1.5
   plop: ^3.1.2
   postcss-styled-syntax: ^0.3.2
   prettier: ^2.8.4
@@ -127,6 +128,7 @@ devDependencies:
   jest-environment-jsdom: 29.4.3
   lint-staged: 13.1.2
   next-images: 1.8.4_webpack@5.75.0
+  npm-run-all: 4.1.5
   postcss-styled-syntax: 0.3.2_typescript@4.9.5
   prettier: 2.8.4
   react-is: 18.2.0
@@ -11782,6 +11784,11 @@ packages:
       readable-stream: 2.3.7
     dev: true
 
+  /memorystream/0.3.1:
+    resolution: {integrity: sha512-S3UwM3yj5mtUSEfP41UZmt/0SCoVYUcU1rkXv+BQ5Ig8ndL4sPoJNBUJERafdPb5jjHJGuMgytgKvKIf58XNBw==}
+    engines: {node: '>= 0.10.0'}
+    dev: true
+
   /meow/3.7.0:
     resolution: {integrity: sha512-TNdwZs0skRlpPpCUK25StC4VH+tP5GgeY1HQOOGP+lQ2xtdkN2VtT/5tiX9k3IWpkBPV9b3LsAWXn4GGi/PrSA==}
     engines: {node: '>=0.10.0'}
@@ -12323,6 +12330,22 @@ packages:
 
   /normalize-selector/0.2.0:
     resolution: {integrity: sha512-dxvWdI8gw6eAvk9BlPffgEoGfM7AdijoCwOEJge3e3ulT2XLgmU7KvvxprOaCu05Q1uGRHmOhHe1r6emZoKyFw==}
+    dev: true
+
+  /npm-run-all/4.1.5:
+    resolution: {integrity: sha512-Oo82gJDAVcaMdi3nuoKFavkIHBRVqQ1qvMb+9LHk/cF4P6B2m8aP04hGf7oL6wZ9BuGwX1onlLhpuoofSyoQDQ==}
+    engines: {node: '>= 4'}
+    hasBin: true
+    dependencies:
+      ansi-styles: 3.2.1
+      chalk: 2.4.2
+      cross-spawn: 6.0.5
+      memorystream: 0.3.1
+      minimatch: 3.1.2
+      pidtree: 0.3.1
+      read-pkg: 3.0.0
+      shell-quote: 1.8.0
+      string.prototype.padend: 3.1.4
     dev: true
 
   /npm-run-path/2.0.2:
@@ -12980,6 +13003,12 @@ packages:
   /picomatch/2.3.1:
     resolution: {integrity: sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==}
     engines: {node: '>=8.6'}
+
+  /pidtree/0.3.1:
+    resolution: {integrity: sha512-qQbW94hLHEqCg7nhby4yRC7G2+jYHY4Rguc2bjw7Uug4GIJuu1tvf2uHaZv5Q8zdt+WKJ6qK1FOI6amaWUo5FA==}
+    engines: {node: '>=0.10'}
+    hasBin: true
+    dev: true
 
   /pidtree/0.6.0:
     resolution: {integrity: sha512-eG2dWTVw5bzqGRztnHExczNxt5VGsE6OwTeCG3fdUf9KBsZzO3R5OIIIzWR+iZA0NtZ+RDVdaoE2dK1cn6jH4g==}
@@ -14514,6 +14543,10 @@ packages:
   /shebang-regex/3.0.0:
     resolution: {integrity: sha512-7++dFhtcx3353uBaq8DDR4NuxBetBzC7ZQOhmTQInHEd6bSrXdiEyzCvG07Z44UYdLShWUyXt5M/yhz8ekcb1A==}
     engines: {node: '>=8'}
+    dev: true
+
+  /shell-quote/1.8.0:
+    resolution: {integrity: sha512-QHsz8GgQIGKlRi24yFc6a6lN69Idnx634w49ay6+jA5yFh7a1UY+4Rp6HPx/L/1zcEDPEij8cIsiqR6bQsE5VQ==}
     dev: true
 
   /side-channel/1.0.4:
