@@ -1,6 +1,6 @@
 // https://github.com/z1digitalstudio/developers-handbook/blob/master/pages/stylelint.mdx
 module.exports = {
-  customSyntax: '@stylelint/postcss-css-in-js',
+  customSyntax: 'postcss-styled-syntax',
   extends: [
     'stylelint-config-recommended',
     'stylelint-a11y/recommended',
