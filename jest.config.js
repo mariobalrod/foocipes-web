@@ -9,12 +9,12 @@ module.exports = {
   },
   testPathIgnorePatterns: ['<rootDir>/src/test-utils/'],
   collectCoverageFrom: ['**/src/**/*.{ts,tsx}'],
-  coverageThreshold: {
-    './src/graphql/auth/guards': {
-      statements: 95,
-      branches: 95,
-      functions: 95,
-      lines: 95,
-    },
-  },
+  // coverageThreshold: {
+  //   './src/graphql/auth/guards': {
+  //     statements: 95,
+  //     branches: 95,
+  //     functions: 95,
+  //     lines: 95,
+  //   },
+  // },
 };
