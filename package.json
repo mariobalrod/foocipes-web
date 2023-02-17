@@ -8,20 +8,20 @@
     "build": "next build",
     "lint": "eslint .*.js *.js .storybook/*.js src --max-warnings=0",
     "lint:css": "stylelint './src/**/styles.{ts,tsx}'",
-    "lint:fix": "yarn lint --fix",
+    "lint:fix": "pnpm lint --fix",
     "storybook": "start-storybook -s ./public -p 6006",
     "build:storybook": "build-storybook",
     "test": "jest --watch",
     "test:cov": "jest --coverage",
-    "test:cov:report": "yarn test:cov && open coverage/lcov-report/index.html",
+    "test:cov:report": "pnpm test:cov && open coverage/lcov-report/index.html",
     "types:check": "tsc",
     "prettier": "prettier --ignore-path .gitignore \"**/*.+(js|json|ts|tsx)\"",
-    "format": "yarn prettier --write",
-    "format:check": "yarn prettier --list-different",
+    "format": "pnpm prettier --write",
+    "format:check": "pnpm prettier --list-different",
     "validate": "npm-run-all format lint test:cov build",
     "plop": "plop --plopfile scripts/plop/plopfile.js",
     "install-git-hooks": "./scripts/git-hooks/install.sh",
-    "postinstall": "yarn install-git-hooks"
+    "postinstall": "pnpm install-git-hooks"
   },
   "engines": {
     "node": ">= 18.13.0"

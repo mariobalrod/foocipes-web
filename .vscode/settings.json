@@ -19,7 +19,7 @@
   "less.validate": false,
   "scss.validate": false,
   "stylelint.enable": true,
-  "stylelint.packageManager": "yarn",
+  "stylelint.packageManager": "pnpm",
   "stylelint.validate": [
     "css",
     "postcss",
