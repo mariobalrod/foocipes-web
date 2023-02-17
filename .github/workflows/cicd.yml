@@ -9,43 +9,51 @@ on:
   push:
     branches:
       - develop
-      - staging
       - main
   pull_request:
     branches:
       - develop
-      - staging
       - main
   workflow_dispatch:
     branches:
       - develop
-      - staging
       - main
 jobs:
   Setup:
     name: Setup
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
 
-      - name: Cache dependencies
-        id: cache-dependencies
-        uses: actions/cache@v3
-        with:
-          path: |
-            .yarn/unplugged
-            .yarn/build-state.yml
-            .yarn/install-state.gz
-            node_modules
-          key: node-modules-${{ runner.os }}-${{ hashFiles('yarn.lock') }}-${{ hashFiles('.yarnrc.yml') }}
-
-      - name: Setup Node 16
+      - name: Install Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: 16
+
+      - uses: pnpm/action-setup@v2
+        name: Install pnpm
+        id: pnpm-install
+        with:
+          version: 7
+          run_install: false
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
-        run: yarn install --immutable --immutable-cache
+        run: pnpm install
 
   Validate:
     if: |
@@ -53,28 +61,40 @@ jobs:
       github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
 
-      - name: Cache modules
-        uses: actions/cache@v3
-        with:
-          path: |
-            .yarn/unplugged
-            .yarn/build-state.yml
-            .yarn/install-state.gz
-            node_modules
-          key: node-modules-${{ runner.os }}-${{ hashFiles('yarn.lock') }}-${{ hashFiles('.yarnrc.yml') }}
-
-      - name: Setup Node 16
+      - name: Install Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: 16
 
-      - name: Link dependencies
-        run: yarn install --immutable --immutable-cache
+      - uses: pnpm/action-setup@v2
+        name: Install pnpm
+        id: pnpm-install
+        with:
+          version: 7
+          run_install: false
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install
 
       - name: Validate project
-        run: yarn validate
+        run: pnpm validate
 
   Deploy-Preview:
     if: ${{ (github.event_name == 'pull_request') && (github.ref != 'refs/heads/staging' || github.ref != 'refs/heads/main' || github.ref != 'refs/heads/develop')}}
@@ -82,29 +102,41 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [Setup, Validate]
     steps:
-      - name: Checkout Code
+      - name: Checkout
         uses: actions/checkout@v3
-      - name: Cache Dependencies
-        id: cache-dependencies
-        uses: actions/cache@v3
-        with:
-          path: |
-            .yarn/unplugged
-            .yarn/build-state.yml
-            .yarn/install-state.gz
-            node_modules
-          key: node-modules-${{ runner.os }}-${{ hashFiles('yarn.lock') }}-${{ hashFiles('.yarnrc.yml') }}
-      - name: Setup Node 16
+
+      - name: Install Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ env.NODE_VERSION }}
-      - name: Install dependencies if not cached
-        if: steps.cache-dependencies.outputs.cache-hit != 'true'
-        run: yarn install --immutable --immutable-cache
+          node-version: 16
+
+      - uses: pnpm/action-setup@v2
+        name: Install pnpm
+        id: pnpm-install
+        with:
+          version: 7
+          run_install: false
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install
       - name: Assign environment file
         run: cp .env.development .env.production
       - name: Build
-        run: yarn build
+        run: pnpm build
       - name: Deploy Step Preview
         uses: amondnet/vercel-action@v20
         id: deploy-vercel-preview
@@ -129,29 +161,41 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [Setup, Validate]
     steps:
-      - name: Checkout Code
+      - name: Checkout
         uses: actions/checkout@v3
-      - name: Cache Dependencies
-        id: cache-dependencies
-        uses: actions/cache@v3
-        with:
-          path: |
-            .yarn/unplugged
-            .yarn/build-state.yml
-            .yarn/install-state.gz
-            node_modules
-          key: node-modules-${{ runner.os }}-${{ hashFiles('yarn.lock') }}-${{ hashFiles('.yarnrc.yml') }}
-      - name: Setup Node 16
+
+      - name: Install Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ env.NODE_VERSION }}
-      - name: Install dependencies if not cached
-        if: steps.cache-dependencies.outputs.cache-hit != 'true'
-        run: yarn install --frozen-lockfile
+          node-version: 16
+
+      - uses: pnpm/action-setup@v2
+        name: Install pnpm
+        id: pnpm-install
+        with:
+          version: 7
+          run_install: false
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install
       - name: Assign environment file
         run: cp .env.development .env.production
       - name: Build
-        run: yarn build
+        run: pnpm build
       - name: Deploy Step Develop
         uses: amondnet/vercel-action@v20
         id: deploy-vercel-staging
@@ -167,27 +211,39 @@ jobs:
     runs-on: ubuntu-latest
     needs: [Setup, Validate]
     steps:
-      - name: Checkout Code
+      - name: Checkout
         uses: actions/checkout@v3
-      - name: Cache Dependencies
-        id: cache-dependencies
-        uses: actions/cache@v3
-        with:
-          path: |
-            .yarn/unplugged
-            .yarn/build-state.yml
-            .yarn/install-state.gz
-            node_modules
-          key: node-modules-${{ runner.os }}-${{ hashFiles('yarn.lock') }}-${{ hashFiles('.yarnrc.yml') }}
-      - name: Setup Node 16
+
+      - name: Install Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ env.NODE_VERSION }}
-      - name: Install dependencies if not cached
-        if: steps.cache-dependencies.outputs.cache-hit != 'true'
-        run: yarn install --immutable --immutable-cache
+          node-version: 16
+
+      - uses: pnpm/action-setup@v2
+        name: Install pnpm
+        id: pnpm-install
+        with:
+          version: 7
+          run_install: false
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install
       - name: Build
-        run: yarn build
+        run: pnpm build
       - name: Deploy Step Production
         uses: amondnet/vercel-action@v20
         id: deploy-vercel-production

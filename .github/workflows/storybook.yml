@@ -8,56 +8,44 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    with:
+      fetch-depth: 0
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
 
-      # Build cache helps us speed up builds by not building modules that were
-      # already built, and were not changed since last build.
-      - name: Cache build cache
-        uses: actions/cache@v2
+      - name: Install Node.js
+        uses: actions/setup-node@v3
         with:
-          path: build_cache
-          # Because this key is dependant on the commit hash, it will always
-          # miss. This is intended. We want to always download the latest cache,
-          # and always update it, so for that we need to intentionally trigger a
-          # cache miss.
-          key: build_cache-${{ runner.os }}-${{ hashFiles('yarn.lock') }}-${{ github.sha }}
-          # Because the primary key missed, we fall back to restoring from a
-          # restore key. Since we don't include the commit hash here, we will
-          # download the cache from the last job. However, even though the
-          # cache will be restored, this is considered as a cache miss,
-          # therefore the new cache will always be uploaded.
+          node-version: 16
+
+      - uses: pnpm/action-setup@v2
+        name: Install pnpm
+        id: pnpm-install
+        with:
+          version: 7
+          run_install: false
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
-            build_cache-${{ runner.os }}-${{ hashFiles('yarn.lock') }}-
+            ${{ runner.os }}-pnpm-store-
 
-      - name: Cache modules
-        uses: actions/cache@v3
-        with:
-          path: |
-            .yarn/unplugged
-            .yarn/build-state.yml
-            .yarn/install-state.gz
-            node_modules
-          key: node-modules-${{ runner.os }}-${{ hashFiles('yarn.lock') }}-${{ hashFiles('.yarnrc.yml') }}
+      - name: Install dependencies
+        run: pnpm install
 
-      - name: Link dependencies
-        run: yarn install --immutable --immutable-cache
-
-      # Note that we can't conditionally skip this step with
-      # if: steps.cache.outputs.cache-hit == 'true'
-      # Because restoring from a restore-key is considered a cache miss
-      - name: Use build cache
-        # If the build_cache directory exists, move it to node_modules
-        # If it doesn't gracefully exit the process without failing
-        run: >-
-          [[ -d build_cache ]] &&
-          mv build_cache node_modules/.cache ||
-          exit 0
       - name: Build storybook
         run: |
           # Ignore linting as it will be performed in a separate job
           echo "*" > .eslintignore
-          yarn build:storybook
-      - name: Save build cache
-        run: mv node_modules/.cache build_cache
+          pnpm build:storybook
