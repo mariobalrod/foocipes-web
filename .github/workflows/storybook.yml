@@ -8,17 +8,56 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    with:
-      fetch-depth: 0
 
     steps:
       - uses: actions/checkout@v3
 
-      - name: Link dependencies
-        run: pnpm install
+      # Build cache helps us speed up builds by not building modules that were
+      # already built, and were not changed since last build.
+      - name: Cache build cache
+        uses: actions/cache@v2
+        with:
+          path: build_cache
+          # Because this key is dependant on the commit hash, it will always
+          # miss. This is intended. We want to always download the latest cache,
+          # and always update it, so for that we need to intentionally trigger a
+          # cache miss.
+          key: build_cache-${{ runner.os }}-${{ hashFiles('yarn.lock') }}-${{ github.sha }}
+          # Because the primary key missed, we fall back to restoring from a
+          # restore key. Since we don't include the commit hash here, we will
+          # download the cache from the last job. However, even though the
+          # cache will be restored, this is considered as a cache miss,
+          # therefore the new cache will always be uploaded.
+          restore-keys: |
+            build_cache-${{ runner.os }}-${{ hashFiles('yarn.lock') }}-
 
+      - name: Cache modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            .yarn/unplugged
+            .yarn/build-state.yml
+            .yarn/install-state.gz
+            node_modules
+          key: node-modules-${{ runner.os }}-${{ hashFiles('yarn.lock') }}-${{ hashFiles('.yarnrc.yml') }}
+
+      - name: Link dependencies
+        run: yarn install --immutable --immutable-cache
+
+      # Note that we can't conditionally skip this step with
+      # if: steps.cache.outputs.cache-hit == 'true'
+      # Because restoring from a restore-key is considered a cache miss
+      - name: Use build cache
+        # If the build_cache directory exists, move it to node_modules
+        # If it doesn't gracefully exit the process without failing
+        run: >-
+          [[ -d build_cache ]] &&
+          mv build_cache node_modules/.cache ||
+          exit 0
       - name: Build storybook
         run: |
           # Ignore linting as it will be performed in a separate job
           echo "*" > .eslintignore
-          pnpm build:storybook
+          yarn build:storybook
+      - name: Save build cache
+        run: mv node_modules/.cache build_cache
