@@ -1,0 +1,24 @@
+name: Storybook
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    with:
+      fetch-depth: 0
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Link dependencies
+        run: pnpm install
+
+      - name: Build storybook
+        run: |
+          # Ignore linting as it will be performed in a separate job
+          echo "*" > .eslintignore
+          pnpm build:storybook

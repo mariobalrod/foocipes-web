@@ -1,0 +1,145 @@
+name: CI/CD
+concurrency:
+  group: CICD-${{ github.head_ref }}
+
+env:
+  NODE_VERSION: '16.17.0'
+
+on:
+  push:
+    branches:
+      - develop
+      - staging
+      - main
+  pull_request:
+    branches:
+      - develop
+      - staging
+      - main
+  workflow_dispatch:
+    branches:
+      - develop
+      - staging
+      - main
+jobs:
+  Setup:
+    name: Setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: pnpm install
+
+  Validate:
+    if: |
+      github.event_name == 'pull_request' ||
+      github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Link dependencies
+        run: pnpm install
+
+      - name: Validate project
+        run: pnpm validate
+
+  Deploy-Preview:
+    if: ${{ (github.event_name == 'pull_request') && (github.ref != 'refs/heads/staging' || github.ref != 'refs/heads/main' || github.ref != 'refs/heads/develop')}}
+    name: Deploy Preview
+    runs-on: ubuntu-22.04
+    needs: [Setup, Validate]
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Install dependencies
+        run: pnpm install
+      - name: Assign environment file
+        run: cp .env.development .env.production
+      - name: Build
+        run: pnpm build
+      - name: Deploy Step Preview
+        uses: amondnet/vercel-action@v20
+        id: deploy-vercel-preview
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          scope: ${{ secrets.VERCEL_ORG_ID }}
+      - name: Preview URL
+        uses: peter-evans/create-or-update-comment@v2
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            Deploy Preview for ${{ steps.deploy-vercel-preview.outputs.preview-name }}
+            | Name | Link |
+            |------|------|
+            |😎 Deploy Previews|${{ steps.deploy-vercel-preview.outputs.preview-url }}|
+
+  Deploy-Develop:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' }}
+    name: Deploy Develop
+    runs-on: ubuntu-22.04
+    needs: [Setup, Validate]
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+      - name: Assign environment file
+        run: cp .env.development .env.production
+      - name: Build
+        run: pnpm build
+      - name: Deploy Step Develop
+        uses: amondnet/vercel-action@v20
+        id: deploy-vercel-staging
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          scope: ${{ secrets.VERCEL_ORG_ID }}
+
+  Deploy-Production:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    name: Deploy Production
+    runs-on: ubuntu-latest
+    needs: [Setup, Validate]
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Install dependencies
+        run: pnpm install
+      - name: Build
+        run: pnpm build
+      - name: Deploy Step Production
+        uses: amondnet/vercel-action@v20
+        id: deploy-vercel-production
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: '--prod'
+          scope: ${{ secrets.VERCEL_ORG_ID }}

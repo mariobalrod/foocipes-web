@@ -1,0 +1,23 @@
+name: Commitlint
+
+on:
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  commitlint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Link dependencies
+        run: pnpm install
+
+      - name: Lint commits
+        run: pnpm commitlint --from "origin/${BASE_REF}" --to "${GITHUB_SHA}"
+        env:
+          BASE_REF: ${{ github.base_ref }}
