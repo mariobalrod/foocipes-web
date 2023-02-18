@@ -18,6 +18,7 @@ on:
     branches:
       - develop
       - main
+
 jobs:
   Setup:
     name: Setup
@@ -136,7 +137,7 @@ jobs:
       - name: Assign environment file
         run: cp .env.development .env.production
       - name: Build
-        run: pnpm build
+        run: pnpm build && pnpm build:storybook
       - name: Deploy Step Preview
         uses: amondnet/vercel-action@v20
         id: deploy-vercel-preview
@@ -195,7 +196,7 @@ jobs:
       - name: Assign environment file
         run: cp .env.development .env.production
       - name: Build
-        run: pnpm build
+        run: pnpm build && pnpm build:storybook
       - name: Deploy Step Develop
         uses: amondnet/vercel-action@v20
         id: deploy-vercel-staging
