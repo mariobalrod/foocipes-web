@@ -147,3 +147,5 @@ schema.graphql
 # Webstorm IDE files
 .idea
 .vercel
+
+storybook-static

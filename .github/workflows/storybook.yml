@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - develop
+  pull_request:
+    branches:
+      - develop
 
 jobs:
   build:
@@ -49,3 +52,12 @@ jobs:
           # Ignore linting as it will be performed in a separate job
           echo "*" > .eslintignore
           pnpm build:storybook
+
+      - name: Deploy storybook
+        uses: amondnet/vercel-action@v20
+        id: deploy-storybook
+        with:
+          vercel-token: ${{ secrets.VERCEL_STORYBOOK_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_STORYBOOK_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_STORYBOOK_PROJECT_ID }}
+          scope: ${{ secrets.VERCEL_STORYBOOK_ORG_ID }}
