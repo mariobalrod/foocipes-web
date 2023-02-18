@@ -10,7 +10,7 @@
     "lint:css": "stylelint './src/**/styles.{ts,tsx}'",
     "lint:fix": "pnpm lint --fix",
     "storybook": "start-storybook -s ./public -p 6006",
-    "build:storybook": "build-storybook -s public -o ./build/storybook",
+    "build:storybook": "build-storybook -s public -o ./.next/storybook",
     "test": "jest --watch",
     "test:cov": "jest --coverage",
     "test:cov:report": "pnpm test:cov && open coverage/lcov-report/index.html",
