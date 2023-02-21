@@ -82,6 +82,8 @@ export const Icon = styled(Chevron)`
   color: ${({ theme }) => theme.colors.gray900};
   transform: translate(-50%, -50%);
   pointer-events: none;
+  width: 1.25rem;
+  height: 1.25rem;
 `;
 
 export const Error = styled.div`
