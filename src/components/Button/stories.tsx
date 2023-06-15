@@ -13,4 +13,4 @@ export default {
 const Template: Story<Props> = (args) => <Button {...args} />;
 
 export const Default = Template.bind({});
-Default.args = {};
+Default.args = { children: 'Label' };
