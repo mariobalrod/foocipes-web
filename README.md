@@ -1,6 +1,6 @@
 ![CI/CD](https://github.com/foocipes/foocipes-web/workflows/CI/CD/badge.svg)
 
-# Foocipes Webapp
+# Test setup
 
 - Staging URL: url
 - Storybook URL: url
@@ -19,7 +19,7 @@ Run `pnpm start`
 
 ## ℹ️ Basic information
 
-This repo contains the code for Foocipes web application, built with [Next.js][next].
+This repo contains the code for X application, built with [Next.js][next].
 
 Its styles using [Styled Components](https://github.com/styled-components)
 
